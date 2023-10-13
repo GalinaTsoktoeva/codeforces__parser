@@ -67,7 +67,7 @@ class Codeforces(API):
             Task.objects.bulk_create(new_tasks_list)
         #print(tasks_data)
 
-    def get_json_from_codeforces(self, params={}, query=''):
+    def get_json_from_codeforces(self, query=''):
         try:
             response = requests.get(self.url + query)
             return response

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'task',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
