@@ -1,6 +1,3 @@
-import os
-
-import django
 import pytest
 
 from task.services import Codeforces
