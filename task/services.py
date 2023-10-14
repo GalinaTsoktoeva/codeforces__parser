@@ -1,6 +1,8 @@
 import json
+import os
 from abc import ABC, abstractmethod
 
+import django
 import requests
 
 from task.models import Task
@@ -16,8 +18,10 @@ class API(ABC):
 class Codeforces(API):
 
     def __init__(self):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django.settings')
+        django.setup()
         self.name = 'codeforces_conn'
-        self.url = 'https://codeforces.com/api/'
+        self.url = 'https://codeforces.com/api/problemset.problems/'
 
     def __repr__(self):
         return f"{self.__class__.__name__} {self.name}"
@@ -25,12 +29,12 @@ class Codeforces(API):
     def __str__(self):
         return f"{self.name}"
 
-    def get_tasks(self):
+    def get_tasks(self, query=''):
 
         """Парсинг задач с сайта CODEFORCES"""
 
         new_tasks_list = []
-        request = self.get_json_from_codeforces(query='problemset.problems')
+        request = self.get_json_from_codeforces(query)
         parsed = json.loads(request.content)
         request.close()
 
@@ -50,26 +54,25 @@ class Codeforces(API):
                     task_exists = task is not None and Task.objects.filter(name=task.get('name')).exists()
                     if task_exists:
                         continue
-                        #raise Exception(f"Такая задача есть {task.get('name')} {task.get('contestId')}{task.get('index')} !!!")
 
                     # заполняем бд
                     new_tasks_list.append(
                         Task(
-                        name=task['name'],
-                        tags=task['tags'],
-                        complexity=task.get('rating') if task.get('rating') is not None else 0,
-                        numbers=str(task.get('contestId')) + task.get('index'),
-                        count_solutions=solved if solved is not None else 0,
-                        index = task.get('index'),
-                        number_contest = task.get('contestId')
-                    ))
+                            name=task['name'],
+                            tags=task['tags'],
+                            complexity=task.get('rating') if task.get('rating') is not None else 0,
+                            numbers=str(task.get('contestId')) + task.get('index'),
+                            count_solutions=solved if solved is not None else 0,
+                            index=task.get('index'),
+                            number_contest=task.get('contestId')
+                        )
+                    )
 
             Task.objects.bulk_create(new_tasks_list)
-        #print(tasks_data)
 
     def get_json_from_codeforces(self, query=''):
         try:
-            response = requests.get(self.url + query)
+            response = requests.get(query)
             return response
         except ConnectionError:
             print('Connection Error')

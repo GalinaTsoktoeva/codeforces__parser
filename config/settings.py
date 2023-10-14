@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'parser',
+        'NAME': os.getenv('PG_NAME'),
         'USER': os.getenv('PG_USER'),
         'PASSWORD': os.getenv('PG_PASSWORD')
     }
@@ -133,5 +133,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TELEGRAM_API = os.getenv('TELEBOT')
 
+# Настройки для Celery
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'task.tasks.codeforces_parser',  # Путь к задаче
+        'schedule': timedelta(hours=1),  # Расписание выполнения задачи (например, каждый час)
+    },
+}
+
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+
+DJANGO_SETTINGS_MODULE = 'django.settings'

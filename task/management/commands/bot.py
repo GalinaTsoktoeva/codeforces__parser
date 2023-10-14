@@ -1,8 +1,9 @@
-import os, django
+import os
+import django
 import random
 import time
 
-
+from django.conf import settings
 from django.core.management import BaseCommand
 from telebot import TeleBot
 
@@ -11,9 +12,7 @@ from task.models import Task
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django.settings')
 django.setup()
 
-from django.conf import settings
-
-bot = TeleBot(settings.TELEGRAM_API,threaded=False)
+bot = TeleBot(settings.TELEGRAM_API, threaded=False)
 
 
 class Command(BaseCommand):
@@ -39,7 +38,7 @@ class Command(BaseCommand):
         def get_user_text(message):
             task_list = []
             result = []
-            #finish = []
+
             text = message.text.split()
 
             if text:
@@ -66,6 +65,6 @@ class Command(BaseCommand):
         while True:
             try:
                 bot.polling(none_stop=True)
-            except:
+            except Exception():
                 print('upalo')
                 time.sleep(5)
