@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from telebot import TeleBot
 
-from task.models import Task
+from task.services import get_task_filter_complexity, get_task_filter_tags
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django.settings')
 django.setup()
@@ -27,8 +27,8 @@ class Command(BaseCommand):
 
         @bot.message_handler(commands=['start'])
         def start(message):
-            mess = (f'Привет, <b>{message.from_user.first_name}</b> <u>{message.from_user.last_name}</u>! \n/'
-                    f'Этот супер бот поможет выбрать тебе задачи с сайта CODEFORCES\n/'
+            mess = (f'Привет, <b>{message.from_user.first_name}</b> <u>{message.from_user.last_name}</u>! \n'
+                    f'Этот супер бот поможет выбрать тебе задачи с сайта CODEFORCES\n'
                     f'Введите сложность задачи и тему\n'
                     f'Например: 1000 math'
                     )
@@ -44,10 +44,10 @@ class Command(BaseCommand):
             if text:
                 for item_filter in text:
                     if item_filter.isdigit():
-                        complex = list(Task.objects.filter(complexity=item_filter))
+                        complex = get_task_filter_complexity(item_filter)
                         task_list.extend(complex)
                     else:
-                        tag = list(Task.objects.filter(tags__icontains=item_filter))
+                        tag = get_task_filter_tags(item_filter)
                         task_list.extend(tag)
 
             if task_list:

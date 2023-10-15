@@ -51,7 +51,7 @@ class Codeforces(API):
                         solved = filtering[0].get('solvedCount')
 
                     # смотрим, чтобы задачи не было в базе данных
-                    task_exists = task is not None and Task.objects.filter(name=task.get('name')).exists()
+                    task_exists = task is not None and self.get_task_filter_name(name=task.get('name'))
                     if task_exists:
                         continue
 
@@ -68,7 +68,8 @@ class Codeforces(API):
                         )
                     )
 
-            Task.objects.bulk_create(new_tasks_list)
+            self.add_tasks(new_tasks_list)
+        return new_tasks_list
 
     def get_json_from_codeforces(self, query=''):
         try:
@@ -81,3 +82,17 @@ class Codeforces(API):
         except TimeoutError:
             print('Timeout Error')
         return {}
+
+    def get_task_filter_name(self,name):
+        return Task.objects.filter(name=name).exists()
+
+    def add_tasks(self, tasks):
+        Task.objects.bulk_create(tasks)
+
+
+def get_task_filter_complexity(filter):
+    return list(Task.objects.filter(complexity=filter))
+
+
+def get_task_filter_tags(filter):
+    return list(Task.objects.filter(tags__icontains=filter))
